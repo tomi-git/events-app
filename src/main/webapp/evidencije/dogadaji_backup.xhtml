@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html
+        PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      xml:lang="en" lang="en">
+<h:head >
+</h:head>
+
+<h:body>
+    <p:panel id="basic" header="Unos događaja" style="margin-bottom:20px">
+        <h:panelGrid columns="2">
+<!--            <p:outputLabel for="float-input" value="Naziv događaja"/>-->
+<!--            <p:inputText id="float-input" value="#{dogadajiController.nazivDogadaja}" required="true" maxlength="200" size="200"/>-->
+
+            <p:outputLabel for="nazivDogadaja" value="Naziv događaja"/>
+            <p:inputTextarea id="nazivDogadaja" value="#{dogadajiController.nazivDogadaja}" rows="3" cols="40"  maxlength="250" autoResize="false" />
+
+<!--            <h:outputLabel for="grad" value="Grad:  " />-->
+<!--            <p:selectCheckboxMenu id="grad" value="#{dogadajiController.odabraniGrad}" label="Odaberi" style="width:230px" required="true"-->
+<!--                                  filter="true" filterMatchMode="startsWith" panelStyle="width:340px">-->
+<!--                <f:selectItems value="#{dogadajiController.gradovi}" />-->
+<!--            </p:selectCheckboxMenu>-->
+
+<!--            <p:outputLabel for="timeFrom" value="Vrijeme od:  " />-->
+<!--            <p:datePicker id="timeFrom" value="#{dogadajiController.vrijemeOd}" showTime="true" locale="de" pattern="dd.MM.yyyy" required="true"/>-->
+
+<!--            <p:outputLabel for="timeTo" value="Vrijeme do:  " />-->
+<!--            <p:datePicker id="timeTo" value="#{dogadajiController.vrijemeDo}" showTime="true" locale="de" pattern="dd.MM.yyyy" />-->
+
+<!--            <h:outputText value="Slobodan ulaz: " />-->
+<!--            <p:selectBooleanButton id="value1" value="#{dogadajiController.slobodanUlaz}" onLabel="Da" offLabel="Ne" style="width:60px" required="true" />-->
+
+<!--            <p:growl id="growl" life="2000" />-->
+<!--            <p:commandButton value="With Icon" id="withIcon" action="#{dogadajiController.dummyAction}" update="growl" style="margin-right:20px;" icon="pi pi-save" />-->
+
+         </h:panelGrid>
+
+    </p:panel>
+
+
+<!--       <p:inputText id="float-input" value="#{dogadajiController.nazivDogadaja}" />-->
+<!--       <p:outputLabel for="@previous" value="Naziv događaja" />-->
+
+
+
+
+<!--<h:outputText value="Time (German):" />-->
+<!--<h:outputText value="#{dogadajiController.vrijemeOd}">-->
+<!--    <f:convertDateTime pattern="dd.MM.yyyy HH:mm" type="localDateTime" />-->
+<!--</h:outputText>-->
+
+</h:body>
+</html>
