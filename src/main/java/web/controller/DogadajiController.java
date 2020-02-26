@@ -100,8 +100,8 @@ public class DogadajiController implements Serializable {
             } else if (dogadajDto != null) {
                 //create
                 DogadajDto resultDogadaj = dogadajSessionBean.createDogadaj(dogadajDto);
+                dogadajDto.setSifraDogadajaView(resultDogadaj.getSifraDogadaja());
                 addMessage("Događaj je uspješno spremljen. Šifra događaja je " + resultDogadaj.getSifraDogadaja() + ".", DogadajAppConstants.SEVERITY_INFO);
-                resetDto();
                 fetchDogadajList();
             } else {
                 addMessage("Događaj je prazan (nema podataka).", DogadajAppConstants.SEVERITY_WARN);
@@ -173,8 +173,9 @@ public class DogadajiController implements Serializable {
         dogadajiFilterList1 = null;
     }
 
-    private void resetDto() {
+    public void resetDto() {
         getDogadajDto().setSifraDogadaja(null);
+        getDogadajDto().setSifraDogadajaView(null);
         getDogadajDto().setNazivDogadaja(null);
         getDogadajDto().setVrijemeOd(null);
         getDogadajDto().setVrijemeDo(null);

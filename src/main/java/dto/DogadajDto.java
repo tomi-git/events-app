@@ -11,6 +11,7 @@ public class DogadajDto implements Serializable {
     private static final long serialVersionUID = 1L;
     // fields
     private Integer sifraDogadaja;
+    private Integer sifraDogadajaView;
     private String nazivDogadaja;
     private GradDto gradDogadajaDto;
     private LocalDateTime vrijemeOd;
@@ -69,5 +70,13 @@ public class DogadajDto implements Serializable {
 
     public void setSlobodanUlaz(String slobodanUlaz) {
         this.slobodanUlaz = slobodanUlaz;
+    }
+
+    public Integer getSifraDogadajaView() {
+        return sifraDogadajaView;
+    }
+
+    public void setSifraDogadajaView(Integer sifraDogadajaView) {
+        this.sifraDogadajaView = sifraDogadajaView;
     }
 }
