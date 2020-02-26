@@ -229,7 +229,6 @@
                     <f:selectItems
                             value="#{dogadajiController.getGrad(dogadajiController.dogadajFilterDto.odabraneRegije, dogadajiController.dogadajFilterDto.odabraneZupanije, dogadajiController.dogadajFilterDto.odabraneVelicineGrada)}"/>
                 </p:selectCheckboxMenu>
-                <p:separator /><p:separator />
                 <p:commandButton value="Poništi filter" actionListener="#{dogadajiController.resetFilterDto}"
                                  id="filterreset" style="margin-right:20px;margin-top:10px;margin-bottom: 10px" ajax="true"
                                  update="panel_filter2" icon="pi pi-replay"/>
