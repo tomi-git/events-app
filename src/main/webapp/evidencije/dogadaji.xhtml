@@ -91,8 +91,8 @@
                     <p:rowEditor/>
                 </p:column>
 
-                <p:column filterBy="#{dogadaj.sifraDogadaja}" sortBy="#{dogadaj.sifraDogadaja}" headerText="Šifra"
-                          footerText="sadrži" filterMatchMode="contains">
+                <p:column filterBy="#{dogadaj.sifraDogadaja}" headerText="Šifra"
+                          footerText="jednaka" filterMatchMode="exact">
                     <h:outputText value="#{dogadaj.sifraDogadaja}"/>
                 </p:column>
                 <p:column filterBy="#{dogadaj.nazivDogadaja}" headerText="Naziv" footerText="sadrži"
@@ -231,10 +231,10 @@
                 </p:selectCheckboxMenu>
                 <p:separator /><p:separator />
                 <p:commandButton value="Poništi filter" actionListener="#{dogadajiController.resetFilterDto}"
-                                 id="filterreset" style="margin-right:20px;" ajax="true"
+                                 id="filterreset" style="margin-right:20px;margin-top:10px;margin-bottom: 10px" ajax="true"
                                  update="panel_filter2" icon="pi pi-replay"/>
                 <p:commandButton value="Pretraži" actionListener="#{dogadajiController.getFilterListDogadaj}"
-                                 id="filter" style="margin-right:20px;" ajax="true" update="filterAdvanced"
+                                 id="filter" style="margin-right:20px;margin-top:10px;margin-bottom: 10px" ajax="true" update="filterAdvanced"
                                  icon="pi pi-search"/>
             </h:panelGrid>
 
