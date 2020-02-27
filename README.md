@@ -14,7 +14,6 @@ Project use created datasource on Payara. You need to add name of the JTA dataso
 #### SQL Script Path  
 src/main/resources/db/events-app-sql.sql
 
-#### War  
 
 
 
