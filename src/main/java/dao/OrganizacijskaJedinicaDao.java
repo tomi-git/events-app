@@ -73,25 +73,6 @@ public class OrganizacijskaJedinicaDao extends GenericDao<Object, Organizacijska
         return "SELECT e FROM OrganizacijskaJedinica e";
     }
 
-    public Map<Integer, List<SelectItem>> getSelectItemsOrgJedinica() {
-        Map<Integer, List<SelectItem>> result = new HashMap<>();
-        List<OrganizacijskaJedinicaDto> listaOrgJedinicaDto = findAll();
-        //regija
-        List<SelectItem> regijaSelectItems = new ArrayList<>();
-        Stream<OrganizacijskaJedinicaDto> orgJedinicaRegijaStream = listaOrgJedinicaDto.stream().filter(p -> p.getTipOrganizacijskeJediniceDto().getSifraTipOrgJedinice().equals(DogadajAppConstants.TIP_ORGANIZACIJSKE_JEDINICE_REGIJA));
-        orgJedinicaRegijaStream.forEach(p -> regijaSelectItems.add(new SelectItem(p.getSifraOrgJedinice(), p.getNazivOrgJedinice())));
-
-        //zupanija
-        List<SelectItem> zupanijaSelectItems = new ArrayList<>();
-        Stream<OrganizacijskaJedinicaDto> orgJedinicaZupanijaStream = listaOrgJedinicaDto.stream().filter(p -> p.getTipOrganizacijskeJediniceDto().getSifraTipOrgJedinice().equals(DogadajAppConstants.TIP_ORGANIZACIJSKE_JEDINICE_ZUPANIJA));
-        orgJedinicaZupanijaStream.forEach(p -> zupanijaSelectItems.add(new SelectItem(p.getSifraOrgJedinice(), p.getNazivOrgJedinice())));
-
-        result.put(DogadajAppConstants.TIP_ORGANIZACIJSKE_JEDINICE_REGIJA, regijaSelectItems);
-        result.put(DogadajAppConstants.TIP_ORGANIZACIJSKE_JEDINICE_ZUPANIJA, zupanijaSelectItems);
-
-        return result;
-    }
-
     public List<SelectItem> getZupanijaListByRegijaList(String[] regije) {
         List<SelectItem> resultSelectItems = new ArrayList<>();
         resultSelectItems.add(new SelectItem("", "Odaberite"));

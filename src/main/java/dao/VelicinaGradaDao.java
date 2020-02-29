@@ -36,16 +36,4 @@ public class VelicinaGradaDao extends GenericDao<VelicinaGrada, VelicinaGradaDto
         return "SELECT e FROM VelicinaGrada e";
     }
 
-    public List<SelectItem> getSelectItemsForVelicinaGrada() {
-        List<SelectItem> result = new ArrayList<SelectItem>();
-        result.add(new SelectItem("", "Odaberite"));
-        List<VelicinaGradaDto> velicinaGradaDtoList = findAll();
-        if (velicinaGradaDtoList != null && !velicinaGradaDtoList.isEmpty()) {
-            for (VelicinaGradaDto velicinaGradaDto : velicinaGradaDtoList) {
-                result.add(new SelectItem(velicinaGradaDto.getSifraVelicineGrada(), velicinaGradaDto.getNazivVelicineGrada()));
-            }
-        }
-        return result;
-    }
-
 }

@@ -2,6 +2,7 @@ package dao;
 
 import dto.GradDto;
 import dto.OrganizacijskaJedinicaDto;
+import dto.VelicinaGradaDto;
 import entity.Grad;
 import entity.OrganizacijskaJedinica;
 import entity.VelicinaGrada;
@@ -54,6 +55,11 @@ public class GradDao extends GenericDao<Grad, GradDto> implements Serializable {
                 nadredenaOrganizacijskaJedinicaDto.setNazivOrgJedinice(entity.getOrganizacijskaJedinica().getNadredenaOrgJedinica().getNazivOrgJedinice());
                 organizacijskaJedinicaDto.setNadredenaOrganizacijeDto(nadredenaOrganizacijskaJedinicaDto);
             }
+            if (entity.getVelicinaGrada() != null) {
+                VelicinaGradaDto velicinaGradaDto = new VelicinaGradaDto();
+                velicinaGradaDto.setSifraVelicineGrada(entity.getVelicinaGrada().getSifraVelicineGrada());
+                gradDto.setVelicinaGradaDto(velicinaGradaDto);
+            }
             gradDto.setOrganizacijskaJedinicaDto(organizacijskaJedinicaDto);
         }
         return gradDto;
@@ -62,18 +68,6 @@ public class GradDao extends GenericDao<Grad, GradDto> implements Serializable {
     @Override
     protected String getBasicSql() {
         return "SELECT e FROM Grad e";
-    }
-
-    public List<SelectItem> getSelectItemsForGrad() {
-        List<SelectItem> result = new ArrayList<SelectItem>();
-        result.add(new SelectItem("", "Odaberite"));
-        List<GradDto> listaGradovaDto = findAll();
-        if (listaGradovaDto != null && !listaGradovaDto.isEmpty()) {
-            for (GradDto gradDto : listaGradovaDto) {
-                result.add(new SelectItem(gradDto.getSifraGrada(), gradDto.getNazivGrada()));
-            }
-        }
-        return result;
     }
 
     public List<SelectItem> getGradListByZupanijaVelicina(String[] regije, String[] zupanije, String[] velicine) {

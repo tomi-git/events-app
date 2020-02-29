@@ -208,7 +208,7 @@
                                       multiple="true"
                                       filter="true" filterMatchMode="startsWith" panelStyle="width:250px">
                     <f:selectItems
-                            value="#{dogadajiController.getTablica(dogadajiController.dogadajFilterDto.odabraneRegije)}"/>
+                            value="#{dogadajiController.getZupanija(dogadajiController.dogadajFilterDto.odabraneRegije)}"/>
                     <p:ajax update="gradFilter"/>
                 </p:selectCheckboxMenu>
 

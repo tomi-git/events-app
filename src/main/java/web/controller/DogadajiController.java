@@ -5,20 +5,18 @@ import dao.DogadajDao;
 import dao.GradDao;
 import dao.OrganizacijskaJedinicaDao;
 import dao.VelicinaGradaDao;
-import dto.DogadajDto;
-import dto.DogadajFilterDto;
-import dto.GradDto;
+import dto.*;
 import exception.DogadajAppRuleException;
 import org.apache.commons.lang3.StringUtils;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.event.RowEditEvent;
 import util.DogadajAppConstants;
+import util.DogadajAppUtil;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
-import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
@@ -26,7 +24,6 @@ import javax.inject.Named;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /*
  * Web managed bean za dogadaj
@@ -47,17 +44,18 @@ public class DogadajiController implements Serializable {
     private List<DogadajDto> dogadajiFilterList;
     private List<DogadajDto> dogadajiFilterList1;
 
-    private List<SelectItem> gradSelectItems;
-    private List<SelectItem> zupanijaSelectItems;
-    private List<SelectItem> regijaSelectItems;
+    //input form select items
+    private List<SelectItem> gradSelectItems = new ArrayList<>();
 
     //filter select items
-    private List<SelectItem> slobodanUlazFilterSelectItems;
-    private List<SelectItem> gradFilterSelectItems;
-    private List<SelectItem> zupanijaFilterSelectItems;
-    private List<SelectItem> regijaFilterSelectItems;
-    private List<SelectItem> velicinaGradaFilterSelectItems;
+    private List<SelectItem> slobodanUlazFilterSelectItems = new ArrayList<>();
+    private List<SelectItem> regijaFilterSelectItems = new ArrayList<>();
+    private List<SelectItem> velicinaGradaFilterSelectItems = new ArrayList<>();
 
+    //pune se kod inita
+    private List<OrganizacijskaJedinicaDto> organizacijskaJedinicaDtoList;
+    private List<GradDto> gradDtoList;
+    private List<VelicinaGradaDto> velicinaGradaDtoList;
     //CDI
     @Inject
     private GradDao gradDao;
@@ -80,13 +78,12 @@ public class DogadajiController implements Serializable {
     public void init() {
         //initialization dto object
         initializeDogadajDto();
+        // fetch list grad, organizacijska jedinica, dogadaj
+        fetchInitList();
         //select items
-        fetchInitSelectItems();
+        getSelectItems();
         //initialization
         dogadajFilterDto = new DogadajFilterDto();
-
-        //get dogadaj for data table
-        fetchDogadajList();
     }
 
     //create/edit dogadaj
@@ -183,11 +180,53 @@ public class DogadajiController implements Serializable {
         getDogadajDto().setSlobodanUlaz("false");
     }
 
-    public List<SelectItem> getTablica(String[] regije) {
+
+    /*
+     * Dohvat županije kod promjene regije u filteru
+     */
+    public List<SelectItem> getZupanija(String[] regije) {
+        List<SelectItem> zupanijaSelectItems = new ArrayList<>();
+        if (regije != null && regije.length > 0) {
+            organizacijskaJedinicaDtoList.stream()
+                    .filter(zupanija -> zupanija.getNadredenaOrganizacijeDto() != null && zupanija.getNadredenaOrganizacijeDto().getSifraOrgJedinice() != null)
+                    .filter(zupanija -> DogadajAppUtil.getIntegerFromStringList(regije).contains(zupanija.getNadredenaOrganizacijeDto().getSifraOrgJedinice()))
+                    .forEach(organizacijskaJedinicaDto -> zupanijaSelectItems.add(new SelectItem(organizacijskaJedinicaDto.getSifraOrgJedinice(), organizacijskaJedinicaDto.getNazivOrgJedinice())));
+        } else {
+            organizacijskaJedinicaDtoList.stream()
+                    .filter(zupanija -> zupanija.getNadredenaOrganizacijeDto() != null && zupanija.getNadredenaOrganizacijeDto().getSifraOrgJedinice() != null)
+                    .forEach(organizacijskaJedinicaDto -> zupanijaSelectItems.add(new SelectItem(organizacijskaJedinicaDto.getSifraOrgJedinice(), organizacijskaJedinicaDto.getNazivOrgJedinice())));
+        }
+        return zupanijaSelectItems;
+    }
+
+    /*
+     * Dohvat županije kod promjene regije OLD WAY
+     */
+    public List<SelectItem> getZupanijaDB(String[] regije) {
         return orgJedinicaDao.getZupanijaListByRegijaList(regije);
     }
 
+    /*
+     * Dohvat gradova kod promjene regije, županije, veličine grada u filteru
+     */
     public List<SelectItem> getGrad(String[] regije, String[] zupanije, String[] velicine) {
+        List<SelectItem> gradSelectedItems = new ArrayList<>();
+        if ((regije != null && regije.length > 0) || (zupanije != null && zupanije.length > 0) || (velicine != null && velicine.length > 0)) {
+            gradDtoList.stream()
+                    .filter((regije != null && regije.length > 0) ? gradDto -> DogadajAppUtil.getIntegerFromStringList(regije).contains(gradDto.getOrganizacijskaJedinicaDto().getNadredenaOrganizacijeDto().getSifraOrgJedinice()) : gradDto -> true)
+                    .filter((zupanije != null && zupanije.length > 0) ? gradDto -> DogadajAppUtil.getIntegerFromStringList(zupanije).contains(gradDto.getOrganizacijskaJedinicaDto().getSifraOrgJedinice()) : gradDto -> true)
+                    .filter((velicine != null && velicine.length > 0) ? gradDto -> DogadajAppUtil.getIntegerFromStringList(velicine).contains(gradDto.getVelicinaGradaDto().getSifraVelicineGrada()) : gradDto -> true)
+                    .forEach(gradDto -> gradSelectedItems.add(new SelectItem(gradDto.getSifraGrada(), gradDto.getNazivGrada())));
+        } else {
+            gradDtoList.stream().forEach(gradDto -> gradSelectedItems.add(new SelectItem(gradDto.getSifraGrada(), gradDto.getNazivGrada())));
+        }
+        return gradSelectedItems;
+    }
+
+    /*
+     * Dohvat gradova kod promjene regije, županije, veličine grada u filteru OLD WAY
+     */
+    public List<SelectItem> getGradDB(String[] regije, String[] zupanije, String[] velicine) {
         return gradDao.getGradListByZupanijaVelicina(regije, zupanije, velicine);
     }
 
@@ -216,23 +255,36 @@ public class DogadajiController implements Serializable {
         dogadajDto.setGradDogadajaDto(new GradDto());
     }
 
-    private void fetchInitSelectItems() {
-        gradSelectItems = gradDao.getSelectItemsForGrad();
-        Map<Integer, List<SelectItem>> organizacijskaJedinicaMap = orgJedinicaDao.getSelectItemsOrgJedinica();
-        regijaSelectItems = organizacijskaJedinicaMap.get(DogadajAppConstants.TIP_ORGANIZACIJSKE_JEDINICE_REGIJA);
-        zupanijaSelectItems = organizacijskaJedinicaMap.get(DogadajAppConstants.TIP_ORGANIZACIJSKE_JEDINICE_ZUPANIJA);
+    /*
+     * Dohvat liste organizacijskih jedinice, gradova, velcine gradova i događaja
+     */
+    private void fetchInitList() {
+        organizacijskaJedinicaDtoList = orgJedinicaDao.findAll();
+        gradDtoList = gradDao.findAll();
+        velicinaGradaDtoList = velicinaGradaDao.findAll();
+        dogadajiList = dogadajDao.findAll(); //lista svih događaja za prikaz na tablici (DEMO) / u slučaju velike količine podataka LAZY load
+    }
 
-        //filter
-        slobodanUlazFilterSelectItems = new ArrayList<>();
-        slobodanUlazFilterSelectItems.add(new SelectItem("", "Odaberite"));
+    /*
+     * Punjenje slecet item-a za input form/filter (onih koji se dinamički ne pune)
+     */
+    private void getSelectItems() {
+        //grad - input form
+        gradSelectItems.add(new SelectItem(null, "Odaberite"));
+        gradDtoList.stream().forEach(gradDto -> gradSelectItems.add(new SelectItem(gradDto.getSifraGrada(), gradDto.getNazivGrada())));
+        //slobodan ulaz - filter
+        slobodanUlazFilterSelectItems.add(new SelectItem(null, ""));
         slobodanUlazFilterSelectItems.add(new SelectItem(DogadajAppConstants.ENTITY_SLOBODAN_ULAZ_DA, DogadajAppConstants.ENTITY_SLOBODAN_ULAZ_DA));
         slobodanUlazFilterSelectItems.add(new SelectItem(DogadajAppConstants.ENTITY_SLOBODAN_ULAZ_NE, DogadajAppConstants.ENTITY_SLOBODAN_ULAZ_NE));
-        gradFilterSelectItems = new ArrayList<>(gradSelectItems);
-        regijaFilterSelectItems = new ArrayList<>(regijaSelectItems);
-        zupanijaFilterSelectItems = new ArrayList<>(zupanijaSelectItems);
-        velicinaGradaFilterSelectItems = velicinaGradaDao.getSelectItemsForVelicinaGrada();
-
+        //regija - filter
+        organizacijskaJedinicaDtoList.stream()
+                .filter(organizacijskaJedinicaDto -> organizacijskaJedinicaDto.getNadredenaOrganizacijeDto() == null)
+                .forEach(organizacijskaJedinicaDto -> regijaFilterSelectItems.add(new SelectItem(organizacijskaJedinicaDto.getSifraOrgJedinice(), organizacijskaJedinicaDto.getNazivOrgJedinice())));
+        //velcina grada
+        velicinaGradaDtoList.stream()
+                .forEach(velicinaGradaDto -> velicinaGradaFilterSelectItems.add(new SelectItem(velicinaGradaDto.getSifraVelicineGrada(), velicinaGradaDto.getNazivVelicineGrada())));
     }
+
 
     private List<DogadajDto> fetchDogadajList() {
         return dogadajiList = dogadajDao.findAll();
@@ -279,44 +331,12 @@ public class DogadajiController implements Serializable {
         this.dogadajFilterDto = dogadajFilterDto;
     }
 
-    public List<SelectItem> getZupanijaSelectItems() {
-        return zupanijaSelectItems;
-    }
-
-    public void setZupanijaSelectItems(List<SelectItem> zupanijaSelectItems) {
-        this.zupanijaSelectItems = zupanijaSelectItems;
-    }
-
-    public List<SelectItem> getRegijaSelectItems() {
-        return regijaSelectItems;
-    }
-
-    public void setRegijaSelectItems(List<SelectItem> regijaSelectItems) {
-        this.regijaSelectItems = regijaSelectItems;
-    }
-
     public List<SelectItem> getSlobodanUlazFilterSelectItems() {
         return slobodanUlazFilterSelectItems;
     }
 
     public void setSlobodanUlazFilterSelectItems(List<SelectItem> slobodanUlazFilterSelectItems) {
         this.slobodanUlazFilterSelectItems = slobodanUlazFilterSelectItems;
-    }
-
-    public List<SelectItem> getGradFilterSelectItems() {
-        return gradFilterSelectItems;
-    }
-
-    public void setGradFilterSelectItems(List<SelectItem> gradFilterSelectItems) {
-        this.gradFilterSelectItems = gradFilterSelectItems;
-    }
-
-    public List<SelectItem> getZupanijaFilterSelectItems() {
-        return zupanijaFilterSelectItems;
-    }
-
-    public void setZupanijaFilterSelectItems(List<SelectItem> zupanijaFilterSelectItems) {
-        this.zupanijaFilterSelectItems = zupanijaFilterSelectItems;
     }
 
     public List<SelectItem> getRegijaFilterSelectItems() {
@@ -349,5 +369,29 @@ public class DogadajiController implements Serializable {
 
     public void setDogadajiFilterList1(List<DogadajDto> dogadajiFilterList1) {
         this.dogadajiFilterList1 = dogadajiFilterList1;
+    }
+
+    public List<OrganizacijskaJedinicaDto> getOrganizacijskaJedinicaDtoList() {
+        return organizacijskaJedinicaDtoList;
+    }
+
+    public void setOrganizacijskaJedinicaDtoList(List<OrganizacijskaJedinicaDto> organizacijskaJedinicaDtoList) {
+        this.organizacijskaJedinicaDtoList = organizacijskaJedinicaDtoList;
+    }
+
+    public List<GradDto> getGradDtoList() {
+        return gradDtoList;
+    }
+
+    public void setGradDtoList(List<GradDto> gradDtoList) {
+        this.gradDtoList = gradDtoList;
+    }
+
+    public List<VelicinaGradaDto> getVelicinaGradaDtoList() {
+        return velicinaGradaDtoList;
+    }
+
+    public void setVelicinaGradaDtoList(List<VelicinaGradaDto> velicinaGradaDtoList) {
+        this.velicinaGradaDtoList = velicinaGradaDtoList;
     }
 }
