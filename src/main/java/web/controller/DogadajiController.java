@@ -10,6 +10,7 @@ import exception.DogadajAppRuleException;
 import org.apache.commons.lang3.StringUtils;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.event.RowEditEvent;
+import org.primefaces.event.SelectEvent;
 import util.DogadajAppConstants;
 import util.DogadajAppUtil;
 
@@ -17,6 +18,7 @@ import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.FacesContext;
+import javax.faces.event.AjaxBehaviorEvent;
 import javax.faces.model.SelectItem;
 import javax.faces.view.ViewScoped;
 import javax.inject.Inject;
@@ -36,9 +38,7 @@ public class DogadajiController implements Serializable {
     //fields
     private static final long serialVersionUID = 1L;
     private DogadajDto dogadajDto;
-    private DogadajDto dogadajEditDto;
     private DogadajFilterDto dogadajFilterDto;
-
 
     private List<DogadajDto> dogadajiList;
     private List<DogadajDto> dogadajiFilterList;
@@ -89,17 +89,14 @@ public class DogadajiController implements Serializable {
     //create/edit dogadaj
     public void save() {
         try {
-            if (dogadajEditDto != null && dogadajEditDto.getSifraDogadaja() != null) {
-                dogadajSessionBean.editDogadaj(dogadajEditDto);
-                addMessage("Događaj " + dogadajEditDto.getSifraDogadaja() + " je uspješno ažuriran.", DogadajAppConstants.SEVERITY_INFO);
-                fetchDogadajList();
-                dogadajEditDto = null;
+            if (dogadajDto != null && dogadajDto.getSifraDogadaja() != null) {
+                dogadajSessionBean.editDogadaj(dogadajDto);
+                addMessage("Događaj " + dogadajDto.getSifraDogadaja() + " je uspješno ažuriran.", DogadajAppConstants.SEVERITY_INFO);
             } else if (dogadajDto != null) {
                 //create
                 DogadajDto resultDogadaj = dogadajSessionBean.createDogadaj(dogadajDto);
-                dogadajDto.setSifraDogadajaView(resultDogadaj.getSifraDogadaja());
+                dogadajDto.setSifraDogadaja(resultDogadaj.getSifraDogadaja());
                 addMessage("Događaj je uspješno spremljen. Šifra događaja je " + resultDogadaj.getSifraDogadaja() + ".", DogadajAppConstants.SEVERITY_INFO);
-                fetchDogadajList();
             } else {
                 addMessage("Događaj je prazan (nema podataka).", DogadajAppConstants.SEVERITY_WARN);
             }
@@ -116,7 +113,9 @@ public class DogadajiController implements Serializable {
         }
     }
 
-    //filter dogadaj
+    /*
+     * Dohvati događaje prema popunjenom filteru
+     */
     public void getFilterListDogadaj() {
         try {
             dogadajiFilterList1 = dogadajDao.getFilterList(dogadajFilterDto);
@@ -133,22 +132,37 @@ public class DogadajiController implements Serializable {
         }
     }
 
+    /*
+     * Odabirom retk u tablici popunjava se dogadajDto, odnosno popunjava input form
+     */
+    public void onTableRowSelect(AjaxBehaviorEvent event) {
+        try {
+            Object selected = ((SelectEvent) event).getObject();
+            if (selected instanceof DogadajDto && ((DogadajDto) selected).getSifraDogadaja() != null) {
+                DogadajDto selectedDogadajDto = (DogadajDto) selected;
+                dogadajDto = dogadajDao.getFilterList(new DogadajFilterDto(selectedDogadajDto.getSifraDogadaja())).get(0);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            addMessage("Došlo je do greške odabira događaja.", DogadajAppConstants.SEVERITY_ERR);
+        }
+    }
+
+    /*
+     * Za potrebe row edita (kada se koristi row edit u trablici)
+     */
     public void onRowEdit(RowEditEvent event) {
         try {
             DataTable dataTable = (DataTable) event.getSource();
-            dogadajEditDto = new DogadajDto();
-            dogadajEditDto = (DogadajDto) dataTable.getRowData();
-            if (dogadajEditDto.getSifraDogadaja() != null) {
-                save();
-            }
+//            dogadajEditDto = new DogadajDto();
+//            dogadajEditDto = (DogadajDto) dataTable.getRowData();
+//            if (dogadajEditDto.getSifraDogadaja() != null) {
+//                save();
+//            }
         } catch (Exception ex) {
             ex.printStackTrace();
             addMessage("Došlo je do greške prilikom ažuriranja događaja.", DogadajAppConstants.SEVERITY_ERR);
         }
-    }
-
-    public void onRowCancel(RowEditEvent event) {
-        //TODO
     }
 
     public void resetFilterDto() {
@@ -172,14 +186,12 @@ public class DogadajiController implements Serializable {
 
     public void resetDto() {
         getDogadajDto().setSifraDogadaja(null);
-        getDogadajDto().setSifraDogadajaView(null);
         getDogadajDto().setNazivDogadaja(null);
         getDogadajDto().setVrijemeOd(null);
         getDogadajDto().setVrijemeDo(null);
         getDogadajDto().setGradDogadajaDto(new GradDto());
         getDogadajDto().setSlobodanUlaz("false");
     }
-
 
     /*
      * Dohvat županije kod promjene regije u filteru
@@ -353,14 +365,6 @@ public class DogadajiController implements Serializable {
 
     public void setVelicinaGradaFilterSelectItems(List<SelectItem> velicinaGradaFilterSelectItems) {
         this.velicinaGradaFilterSelectItems = velicinaGradaFilterSelectItems;
-    }
-
-    public DogadajDto getDogadajEditDto() {
-        return dogadajEditDto;
-    }
-
-    public void setDogadajEditDto(DogadajDto dogadajEditDto) {
-        this.dogadajEditDto = dogadajEditDto;
     }
 
     public List<DogadajDto> getDogadajiFilterList1() {

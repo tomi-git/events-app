@@ -32,6 +32,7 @@ public class DogadajDao extends GenericDao<Object, DogadajDto> implements Serial
     private static final int IDX_GRAD_VELICINA_NAZIV = 6;
     private static final int IDX_ZUPANIJA_NAZIV = 7;
     private static final int IDX_REGIJA_NAZIV = 8;
+    private static final int IDX_GRAD_SIFRA = 9;
 
     @Override
     protected Dogadaj formEntity(DogadajDto dto) {
@@ -116,6 +117,7 @@ public class DogadajDao extends GenericDao<Object, DogadajDto> implements Serial
                 //grad
                 GradDto gradDto = new GradDto();
                 gradDto.setNazivGrada((String) entity[IDX_GRAD_NAZIV]);
+                gradDto.setSifraGrada((Integer) entity[IDX_GRAD_SIFRA]);
                 //velicina grada
                 VelicinaGradaDto velicinaGradaDto = new VelicinaGradaDto();
                 velicinaGradaDto.setNazivVelicineGrada((String) entity[IDX_GRAD_VELICINA_NAZIV]);
@@ -263,8 +265,7 @@ public class DogadajDao extends GenericDao<Object, DogadajDto> implements Serial
         //formiranje liste dogadaja
         if (listDogadajObjects != null && !listDogadajObjects.isEmpty()) {
             resultList = new ArrayList<>();
-            Stream<Object[]> listDogadajaStream = listDogadajObjects.stream();
-            listDogadajaStream.forEach(p -> resultList.add(formDTO(p)));
+            listDogadajObjects.stream().forEach(p -> resultList.add(formDTO(p)));
         } else {
             resultList = null;
         }
@@ -275,26 +276,33 @@ public class DogadajDao extends GenericDao<Object, DogadajDto> implements Serial
     private List<Object[]> formAndExecuteFilterSql(DogadajFilterDto filterDto) {
         List<Object[]> resultList = null;
 
-        String sql = "select dog.sifra, dog.naziv, dog.vrijeme_od, dog.vrijeme_do, dog.slobodan_ulaz, grad.naziv as nazivg, vel_gr.naziv velicinag , org_jed.naziv nazivz, nad_org_jed.naziv nazivr from igea_tk.dogadaj dog " +
+        String sql = "select dog.sifra, dog.naziv, dog.vrijeme_od, dog.vrijeme_do, dog.slobodan_ulaz, grad.naziv as nazivg, vel_gr.naziv velicinag , org_jed.naziv nazivz, nad_org_jed.naziv nazivr, grad.sifra as sifrag from igea_tk.dogadaj dog " +
                 "join igea_tk.grad grad on grad.sifra = dog.grad " +
                 "join igea_tk.velicina_grada vel_gr on vel_gr.sifra = grad.velicina " +
                 "join igea_tk.organizacijska_jedinica org_jed on org_jed.sifra = grad.org_jedinica " +
                 "join igea_tk.organizacijska_jedinica nad_org_jed on nad_org_jed.sifra = org_jed.org_jedinica " +
                 "where 1 = 1 ";
         //where dio
+        if (filterDto.getSifraDogadaja() != null) sql = sql + "and dog.sifra = :sifraDogadaja ";
         if (StringUtils.isNoneBlank(filterDto.getNazivDogadaja())) sql = sql + "and dog.naziv like :nazivDogadaja ";
         if (filterDto.getVrijemeOdPocetak() != null) sql = sql + "and dog.vrijeme_od >= :vrijemeOdPocetak ";
         if (filterDto.getVrijemeDoPocetak() != null) sql = sql + "and dog.vrijeme_od <= :vrijemeDoPocetak ";
         if (filterDto.getVrijemeOdKraj() != null) sql = sql + "and dog.vrijeme_do >= :vrijemeOdKraj ";
         if (filterDto.getVrijemeDoKraj() != null) sql = sql + "and dog.vrijeme_do <= :vrijemeDoKraj ";
         if (StringUtils.isNoneBlank(filterDto.getSlobodanUlaz())) sql = sql + "and dog.slobodan_ulaz = :ulazSlobodan ";
-        if (filterDto.getOdabraneRegije().length > 0) sql = sql + "and nad_org_jed.sifra in :regije ";
-        if (filterDto.getOdabraneZupanije().length > 0) sql = sql + "and org_jed.sifra in :zupanije ";
-        if (filterDto.getOdabraneVelicineGrada().length > 0) sql = sql + "and vel_gr.sifra in :velicineGrada ";
-        if (filterDto.getOdabraniGradovi().length > 0) sql = sql + "and grad.sifra in :gradovi ";
+        if (filterDto.getOdabraneRegije() != null && filterDto.getOdabraneRegije().length > 0)
+            sql = sql + "and nad_org_jed.sifra in :regije ";
+        if (filterDto.getOdabraneZupanije() != null && filterDto.getOdabraneZupanije().length > 0)
+            sql = sql + "and org_jed.sifra in :zupanije ";
+        if (filterDto.getOdabraneVelicineGrada() != null && filterDto.getOdabraneVelicineGrada().length > 0)
+            sql = sql + "and vel_gr.sifra in :velicineGrada ";
+        if (filterDto.getOdabraniGradovi() != null && filterDto.getOdabraniGradovi().length > 0)
+            sql = sql + "and grad.sifra in :gradovi ";
 
         Query queryDogadaj = getEntityManager().createNativeQuery(sql);
         //parametri
+        if (filterDto.getSifraDogadaja() != null)
+            queryDogadaj.setParameter("sifraDogadaja", filterDto.getSifraDogadaja());
         if (StringUtils.isNoneBlank(filterDto.getNazivDogadaja()))
             queryDogadaj.setParameter("nazivDogadaja", "%" + filterDto.getNazivDogadaja() + "%");
         if (filterDto.getVrijemeOdPocetak() != null)
@@ -307,17 +315,17 @@ public class DogadajDao extends GenericDao<Object, DogadajDto> implements Serial
             queryDogadaj.setParameter("vrijemeDoKraj", filterDto.getVrijemeDoKraj());
         if (StringUtils.isNoneBlank(filterDto.getSlobodanUlaz()))
             queryDogadaj.setParameter("ulazSlobodan", filterDto.getSlobodanUlaz());
-        if (filterDto.getOdabraneRegije().length > 0)
+        if (filterDto.getOdabraneRegije() != null && filterDto.getOdabraneRegije().length > 0)
             queryDogadaj.setParameter("regije", DogadajAppUtil.getIntegerFromStringList(filterDto.getOdabraneRegije()));
-        if (filterDto.getOdabraneZupanije().length > 0)
+        if (filterDto.getOdabraneZupanije() != null && filterDto.getOdabraneZupanije().length > 0)
             queryDogadaj.setParameter("zupanije", DogadajAppUtil.getIntegerFromStringList(filterDto.getOdabraneZupanije()));
-        if (filterDto.getOdabraneVelicineGrada().length > 0)
+        if (filterDto.getOdabraneVelicineGrada() != null && filterDto.getOdabraneVelicineGrada().length > 0)
             queryDogadaj.setParameter("velicineGrada", DogadajAppUtil.getIntegerFromStringList(filterDto.getOdabraneVelicineGrada()));
-        if (filterDto.getOdabraniGradovi().length > 0)
+        if (filterDto.getOdabraniGradovi() != null && filterDto.getOdabraniGradovi().length > 0)
             queryDogadaj.setParameter("gradovi", DogadajAppUtil.getIntegerFromStringList(filterDto.getOdabraniGradovi()));
 
         //aktivni (pretposatvio da se smatra da je grad aktivan ako mu je velicina aktivna
-        if (filterDto.getOdabraneRegije().length == 0 && filterDto.getOdabraneZupanije().length == 0 && filterDto.getOdabraniGradovi().length == 0) {
+        if (filterDto.getSifraDogadaja() == null && (filterDto.getOdabraneRegije() == null || filterDto.getOdabraneRegije().length == 0) && (filterDto.getOdabraneZupanije() == null || filterDto.getOdabraneZupanije().length == 0) && (filterDto.getOdabraniGradovi() == null || filterDto.getOdabraniGradovi().length == 0)) {
             sql = sql + " and vel_gr.aktivan = true ";
         }
         //default order by

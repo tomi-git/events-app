@@ -12,6 +12,7 @@ public class DogadajFilterDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
     // fields
+    private Integer sifraDogadaja;
     private String nazivDogadaja;
     private String slobodanUlaz;
     private Integer sifraGrada;
@@ -40,7 +41,10 @@ public class DogadajFilterDto implements Serializable {
         super();
     }
 
-    // getters & setters
+    public DogadajFilterDto(Integer sifraDogadaja) {
+        this.sifraDogadaja = sifraDogadaja;
+    }
+// getters & setters
 
     public String getNazivDogadaja() {
         return nazivDogadaja;
@@ -168,5 +172,13 @@ public class DogadajFilterDto implements Serializable {
 
     public void setOdabraneVelicineGrada(String[] odabraneVelicineGrada) {
         this.odabraneVelicineGrada = odabraneVelicineGrada;
+    }
+
+    public Integer getSifraDogadaja() {
+        return sifraDogadaja;
+    }
+
+    public void setSifraDogadaja(Integer sifraDogadaja) {
+        this.sifraDogadaja = sifraDogadaja;
     }
 }
