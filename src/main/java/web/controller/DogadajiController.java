@@ -84,7 +84,9 @@ public class DogadajiController implements Serializable {
         dogadajFilterDto = new DogadajFilterDto();
     }
 
-    //create/edit dogadaj
+    /*
+     * save metoda za spremanje/ažuriranje događaja
+     */
     public void save() {
         try {
             if (dogadajDto != null) {
@@ -150,22 +152,8 @@ public class DogadajiController implements Serializable {
     }
 
     /*
-     * Za potrebe row edita (kada se koristi row edit u trablici)
+     * Resetiran filter dto - koristi se kod odabira "Poništi filter" na filter formi
      */
-    public void onRowEdit(RowEditEvent event) {
-        try {
-            DataTable dataTable = (DataTable) event.getSource();
-//            dogadajEditDto = new DogadajDto();
-//            dogadajEditDto = (DogadajDto) dataTable.getRowData();
-//            if (dogadajEditDto.getSifraDogadaja() != null) {
-//                save();
-//            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            addMessage("Došlo je do greške prilikom ažuriranja događaja.", DogadajAppConstants.SEVERITY_ERR);
-        }
-    }
-
     public void resetFilterDto() {
         dogadajFilterDto.setNazivDogadaja(null);
         dogadajFilterDto.setVrijemeDoPocetak(null);
@@ -185,6 +173,9 @@ public class DogadajiController implements Serializable {
         dogadajiFilterList = null;
     }
 
+    /*
+     * Resetiran dto - koristi se kod odabira "Novi" na input formi
+     */
     public void resetDto() {
         getDogadajDto().setSifraDogadaja(null);
         getDogadajDto().setNazivDogadaja(null);
@@ -192,6 +183,7 @@ public class DogadajiController implements Serializable {
         getDogadajDto().setVrijemeDo(null);
         getDogadajDto().setGradDogadajaDto(new GradDto());
         getDogadajDto().setSlobodanUlaz("false");
+        resetFilterDto();
     }
 
     /*
@@ -243,26 +235,9 @@ public class DogadajiController implements Serializable {
         return gradDao.getGradListByZupanijaVelicina(regije, zupanije, velicine);
     }
 
-    public void addMessage(String summary, String severity) {
-        if (StringUtils.isNoneBlank(summary) && StringUtils.isNoneBlank(severity)) {
-            FacesMessage message = null;
-            switch (severity) {
-                case DogadajAppConstants.SEVERITY_ERR:
-                    message = new FacesMessage(FacesMessage.SEVERITY_ERROR, summary, null);
-                    break;
-                case DogadajAppConstants.SEVERITY_INFO:
-                    message = new FacesMessage(FacesMessage.SEVERITY_INFO, summary, null);
-                    break;
-                case DogadajAppConstants.SEVERITY_WARN:
-                    message = new FacesMessage(FacesMessage.SEVERITY_WARN, summary, null);
-                    break;
-                default:
-                    message = new FacesMessage(FacesMessage.SEVERITY_INFO, summary, null);
-            }
-            FacesContext.getCurrentInstance().addMessage(null, message);
-        }
-    }
-
+    /*
+     * Inicijalizacija dto-a kod postconstructa
+     */
     private void initializeDogadajDto() {
         dogadajDto = new DogadajDto();
         dogadajDto.setGradDogadajaDto(new GradDto());
@@ -297,6 +272,42 @@ public class DogadajiController implements Serializable {
                 .forEach(velicinaGradaDto -> velicinaGradaFilterSelectItems.add(new SelectItem(velicinaGradaDto.getSifraVelicineGrada(), velicinaGradaDto.getNazivVelicineGrada())));
     }
 
+    public void addMessage(String summary, String severity) {
+        if (StringUtils.isNoneBlank(summary) && StringUtils.isNoneBlank(severity)) {
+            FacesMessage message = null;
+            switch (severity) {
+                case DogadajAppConstants.SEVERITY_ERR:
+                    message = new FacesMessage(FacesMessage.SEVERITY_ERROR, summary, null);
+                    break;
+                case DogadajAppConstants.SEVERITY_INFO:
+                    message = new FacesMessage(FacesMessage.SEVERITY_INFO, summary, null);
+                    break;
+                case DogadajAppConstants.SEVERITY_WARN:
+                    message = new FacesMessage(FacesMessage.SEVERITY_WARN, summary, null);
+                    break;
+                default:
+                    message = new FacesMessage(FacesMessage.SEVERITY_INFO, summary, null);
+            }
+            FacesContext.getCurrentInstance().addMessage(null, message);
+        }
+    }
+
+    /*
+     * Za potrebe row edita (kada se koristi row edit u tablici) - trenutno se ne koristi
+     */
+    public void onRowEdit(RowEditEvent event) {
+        try {
+            DataTable dataTable = (DataTable) event.getSource();
+//            dogadajEditDto = new DogadajDto();
+//            dogadajEditDto = (DogadajDto) dataTable.getRowData();
+//            if (dogadajEditDto.getSifraDogadaja() != null) {
+//                save();
+//            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            addMessage("Došlo je do greške prilikom ažuriranja događaja.", DogadajAppConstants.SEVERITY_ERR);
+        }
+    }
 
     //getters & setters
     public List<DogadajDto> getDogadajiFilterList() {

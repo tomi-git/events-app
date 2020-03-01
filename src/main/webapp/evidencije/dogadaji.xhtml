@@ -14,7 +14,7 @@
 
 <h:body>
     <h:form>
-        <p:panel id="panel_unos" header="Unos događaja" style="margin-bottom:20px" toggleable="true" toggleSpeed="500"
+        <p:panel id="panel_unos" header="Unos / ažuriranje događaja" style="margin-bottom:20px" toggleable="true" toggleSpeed="500"
                  toggleableHeader="true" widgetVar="widgetInput">
             <h:panelGrid>
                 <p:messages id="messages" showDetail="true" closable="true">
@@ -57,7 +57,7 @@
                                        style="width:60px"/>
                 <p:commandButton value="Novi" actionListener="#{dogadajiController.resetDto}" id="novizapis"
                                  style="margin-right:20px;margin-top:10px;margin-bottom: 10px " ajax="true"
-                                 update="panelGridInputForm" icon="pi pi-replay"/>
+                                 update="panelGridInputForm, j_idt5:filterAdvanced" icon="pi pi-replay"/>
                 <p:commandButton value="Spremi" actionListener="#{dogadajiController.save}" id="spremi"
                                  style="margin-right:20px;margin-top:10px;margin-bottom: 10px" ajax="true"
                                  update="panel_unos, j_idt5:filterAdvanced" icon="pi pi-save"/>
