@@ -155,6 +155,7 @@ public class DogadajiController implements Serializable {
      * Resetiran filter dto - koristi se kod odabira "Poništi filter" na filter formi
      */
     public void resetFilterDto() {
+        dogadajFilterDto.setSifraDogadaja(null);
         dogadajFilterDto.setNazivDogadaja(null);
         dogadajFilterDto.setVrijemeDoPocetak(null);
         dogadajFilterDto.setVrijemeDoKraj(null);
