@@ -40,9 +40,7 @@ public class DogadajiController implements Serializable {
     private DogadajDto dogadajDto;
     private DogadajFilterDto dogadajFilterDto;
 
-    private List<DogadajDto> dogadajiList;
     private List<DogadajDto> dogadajiFilterList;
-    private List<DogadajDto> dogadajiFilterList1;
 
     //input form select items
     private List<SelectItem> gradSelectItems = new ArrayList<>();
@@ -89,14 +87,17 @@ public class DogadajiController implements Serializable {
     //create/edit dogadaj
     public void save() {
         try {
-            if (dogadajDto != null && dogadajDto.getSifraDogadaja() != null) {
-                dogadajSessionBean.editDogadaj(dogadajDto);
-                addMessage("Događaj " + dogadajDto.getSifraDogadaja() + " je uspješno ažuriran.", DogadajAppConstants.SEVERITY_INFO);
-            } else if (dogadajDto != null) {
-                //create
-                DogadajDto resultDogadaj = dogadajSessionBean.createDogadaj(dogadajDto);
-                dogadajDto.setSifraDogadaja(resultDogadaj.getSifraDogadaja());
-                addMessage("Događaj je uspješno spremljen. Šifra događaja je " + resultDogadaj.getSifraDogadaja() + ".", DogadajAppConstants.SEVERITY_INFO);
+            if (dogadajDto != null) {
+                if (dogadajDto.getSifraDogadaja() != null) {
+                    dogadajSessionBean.editDogadaj(dogadajDto);
+                    addMessage("Događaj " + dogadajDto.getSifraDogadaja() + " je uspješno ažuriran.", DogadajAppConstants.SEVERITY_INFO);
+                } else {
+                    //create
+                    DogadajDto resultDogadaj = dogadajSessionBean.createDogadaj(dogadajDto);
+                    dogadajDto.setSifraDogadaja(resultDogadaj.getSifraDogadaja());
+                    addMessage("Događaj je uspješno spremljen. Šifra događaja je " + resultDogadaj.getSifraDogadaja() + ".", DogadajAppConstants.SEVERITY_INFO);
+                }
+                dogadajiFilterList = dogadajDao.getFilterList(new DogadajFilterDto(dogadajDto.getSifraDogadaja()));
             } else {
                 addMessage("Događaj je prazan (nema podataka).", DogadajAppConstants.SEVERITY_WARN);
             }
@@ -118,7 +119,7 @@ public class DogadajiController implements Serializable {
      */
     public void getFilterListDogadaj() {
         try {
-            dogadajiFilterList1 = dogadajDao.getFilterList(dogadajFilterDto);
+            dogadajiFilterList = dogadajDao.getFilterList(dogadajFilterDto);
         } catch (DogadajAppRuleException eventEx) {
             if (eventEx.getMessages() != null && !eventEx.getMessages().isEmpty()) {
                 for (String message : eventEx.getMessages()) {
@@ -181,7 +182,7 @@ public class DogadajiController implements Serializable {
         dogadajFilterDto.setOdabraneVelicineGrada(null);
         dogadajFilterDto.setOdabraniGradovi(null);
         dogadajFilterDto.setOdabraneZupanije(null);
-        dogadajiFilterList1 = null;
+        dogadajiFilterList = null;
     }
 
     public void resetDto() {
@@ -274,7 +275,6 @@ public class DogadajiController implements Serializable {
         organizacijskaJedinicaDtoList = orgJedinicaDao.findAll();
         gradDtoList = gradDao.findAll();
         velicinaGradaDtoList = velicinaGradaDao.findAll();
-        dogadajiList = dogadajDao.findAll(); //lista svih događaja za prikaz na tablici (DEMO) / u slučaju velike količine podataka LAZY load
     }
 
     /*
@@ -298,19 +298,7 @@ public class DogadajiController implements Serializable {
     }
 
 
-    private List<DogadajDto> fetchDogadajList() {
-        return dogadajiList = dogadajDao.findAll();
-    }
-
     //getters & setters
-    public List<DogadajDto> getDogadajiList() {
-        return dogadajiList;
-    }
-
-    public void setDogadajiList(List<DogadajDto> dogadajiList) {
-        this.dogadajiList = dogadajiList;
-    }
-
     public List<DogadajDto> getDogadajiFilterList() {
         return dogadajiFilterList;
     }
@@ -365,14 +353,6 @@ public class DogadajiController implements Serializable {
 
     public void setVelicinaGradaFilterSelectItems(List<SelectItem> velicinaGradaFilterSelectItems) {
         this.velicinaGradaFilterSelectItems = velicinaGradaFilterSelectItems;
-    }
-
-    public List<DogadajDto> getDogadajiFilterList1() {
-        return dogadajiFilterList1;
-    }
-
-    public void setDogadajiFilterList1(List<DogadajDto> dogadajiFilterList1) {
-        this.dogadajiFilterList1 = dogadajiFilterList1;
     }
 
     public List<OrganizacijskaJedinicaDto> getOrganizacijskaJedinicaDtoList() {

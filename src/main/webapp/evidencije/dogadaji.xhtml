@@ -60,7 +60,7 @@
                                  update="panelGridInputForm" icon="pi pi-replay"/>
                 <p:commandButton value="Spremi" actionListener="#{dogadajiController.save}" id="spremi"
                                  style="margin-right:20px;margin-top:10px;margin-bottom: 10px" ajax="true"
-                                 update="panel_unos" icon="pi pi-save"/>
+                                 update="panel_unos, j_idt5:filterAdvanced" icon="pi pi-save"/>
 
             </h:panelGrid>
         </p:panel>
@@ -107,7 +107,7 @@
                 <h:panelGrid columns="2">
                     <h:outputLabel for="sifraFilter" value="Šifra događaja:"/>
                     <p:inputText id="sifraFilter" value="#{dogadajiController.dogadajFilterDto.sifraDogadaja}" />
-                    
+
                     <h:outputLabel for="regijaFilter" value="Regija:"/>
                     <p:selectCheckboxMenu id="regijaFilter"
                                           value="#{dogadajiController.dogadajFilterDto.odabraneRegije}"
@@ -162,7 +162,7 @@
                              paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}"
                              currentPageReportTemplate="{startRecord}-{endRecord} of {totalRecords} records"
                              rowsPerPageTemplate="5,10,15"
-                             value="#{dogadajiController.dogadajiFilterList1}"
+                             value="#{dogadajiController.dogadajiFilterList}"
                              selectionMode="single"
                              rowKey="#{filterDogadajDto.sifraDogadaja}"
                              emptyMessage="Ni jedan događaj nije pronađen">
